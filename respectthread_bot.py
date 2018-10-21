@@ -60,7 +60,7 @@ def generate_reply(comment, resultList):
 		else:
 			replyText += 'Sorry, I couldn\'t find anything on r/respectthreads for *' + query + '*\n\n'
 		
-		replyText += '***\n\n'
+		replyText += '***\n\n
 
 	comment.reply(replyText)
 	print(replyText)
