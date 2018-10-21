@@ -61,10 +61,6 @@ def generate_reply(comment, resultList):
 			replyText += 'Sorry, I couldn\'t find anything on r/respectthreads for *' + query + '*\n\n'
 		
 		replyText += '***\n\n'
-		
-	replyText += '^(This bot is never running. Don\'t try to use it.)\n\n'
-	
-	replyText += '^(Send questions to u/Luke_Username)'
 
 	comment.reply(replyText)
 	print(replyText)
