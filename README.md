@@ -12,3 +12,14 @@ For example, if the line is "Respect Thor (Marvel)" the bot's search function re
 - [Respect: Thor Odinson (Marvel, 616)](https://redd.it/4vfjy5)
 
 The bot then generates a reply using the search results, and the comments are given a list of links to the found respect threads.
+
+## Prerequisites
+
+Built With
+
+* [PRAW](http://praw.readthedocs.io/en/latest/getting_started/installation.html) - The Python Reddit API Wrapper
+* [Python 3.6.5](https://www.python.org/downloads/) - The programming language used by PRAW
+
+## Authors
+
+* **Luke Tran** - [Luke-Tran](https://github.com/Luke-Tran)
