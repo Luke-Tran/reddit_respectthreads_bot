@@ -4,6 +4,7 @@ import time
 import os
 
 keyword = 'respect'
+sub = 'test'
 
 posts_list = []	
 
@@ -27,7 +28,7 @@ def run_bot(r):
 
 	# loop through every comment on a certain subreddit. Limits to 25 comments.
 	print('Obtaining 25 comments...')
-	for comment in r.subreddit('test').comments(limit=25):
+	for comment in r.subreddit(sub).comments(limit=25):
 		replyTo = False
 		body = comment.body.lower()
 
