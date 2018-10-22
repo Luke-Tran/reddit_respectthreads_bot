@@ -61,7 +61,7 @@ def generate_reply(comment, resultList):
 			replyText += 'Sorry, I couldn\'t find anything on r/respectthreads for *' + query + '*\n\n'
 		
 		replyText += '***\n\n'
-
+	
 	comment.reply(replyText)
 	print(replyText)
 	with open("saved_posts.txt", "a") as f:
