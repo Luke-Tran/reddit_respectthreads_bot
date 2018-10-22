@@ -38,7 +38,7 @@ def run_bot(r):
 				linelist = line.split()
 				if len(linelist) >= 2:
 					# For now, it won't check numbered lists.
-					if linelist[0] == keyword or (linelist[0] == '-' and linelist[1] == keyword):
+					if linelist[0] == keyword or (linelist[1] == keyword and (linelist[0] == '-' or linelist[0] == '*' or linelist[0] == '+')):
 						searchResults = generate_search_results(linelist)		
 						resultList.append(LineResults(linelist, searchResults))
 						replyTo = True
@@ -71,7 +71,7 @@ def generate_reply(comment, resultList):
 def generate_search_results(linelist):
 	if linelist[0] == keyword:
 		linelist.pop(0)
-	elif linelist[0] == '-' and linelist[1] == keyword:
+	elif linelist[1] == keyword and (linelist[0] == '-' or linelist[0] == '*' or linelist[0] == '+'):
 		linelist.pop(0)
 		linelist.pop(0)
 
