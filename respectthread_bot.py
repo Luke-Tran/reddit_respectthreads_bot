@@ -2,6 +2,7 @@ import praw
 import config
 import time
 import os
+import unicodedata
 
 keyword = 'respect'
 sub = 'test'
@@ -27,8 +28,8 @@ def run_bot(r):
 	resultList = []
 
 	# loop through every comment on a certain subreddit. Limits to 25 comments.
-	print('Obtaining 25 comments...')
-	for comment in r.subreddit(sub).comments(limit=25):
+	print('Obtaining 50 comments...')
+	for comment in r.subreddit(sub).comments(limit=50):
 		replyTo = False
 		body = comment.body.lower()
 
@@ -61,7 +62,11 @@ def generate_reply(comment, resultList):
 			replyText += 'Sorry, I couldn\'t find anything on r/respectthreads for *' + query + '*\n\n'
 		
 		replyText += '***\n\n'
-	
+		
+	replyText += '^(This bot is never running. Don\'t try to use it.)\n\n'
+	replyText += '[^(Code can be found here.)](https://pastebin.com/gaU5qTmD) '
+	replyText += '^(Send questions to u/Luke_Username)'
+
 	comment.reply(replyText)
 	print(replyText)
 	with open("saved_posts.txt", "a") as f:
@@ -84,13 +89,21 @@ def generate_search_results(linelist):
 	searchResults = r.subreddit('respectthreads').search(query, sort='relevance', syntax='lucene', time_filter='all')
 	filteredResults = []
 	
+	# Separate between bracketed and unbracketed user text, and remove accents.
 	bracketedQuery = substring_in_brackets(query)
+	bracketedQuery = strip_accents(bracketedQuery)
 	unbracketedQuery = substring_out_brackets(query)
+	unbracketedQuery = strip_accents(unbracketedQuery)
 		
 	if len(bracketedQuery) > 0:
 		for post in searchResults:
+			# Separate between bracketed and unbracketed title text, and remove accents.
 			unbracketedTitle = substring_out_brackets(post.title)
+			unbracketedTitle = strip_accents(unbracketedTitle)
 			bracketedTitle = substring_in_brackets(post.title)
+			bracketedTitle = strip_accents(bracketedTitle)
+			
+			# Check for matches between user text and post title.
 			if unbracketedQuery in unbracketedTitle and bracketedQuery in bracketedTitle:
 				filteredResults.append(post)
 	else:
@@ -147,8 +160,23 @@ def get_saved_posts():
 			posts_list = f.read()
 			posts_list = posts_list.split("\n")
 	return posts_list	
+
+# Method retrieved from https://stackoverflow.com/a/44433664
+def strip_accents(text):
+    try:
+        text = unicode(text, 'utf-8')
+    except NameError: # unicode is a default on python 3 
+        pass
+
+    text = unicodedata.normalize('NFD', text)\
+           .encode('ascii', 'ignore')\
+           .decode("utf-8")
+		   
+    return str(text)
 	
 posts_list = get_saved_posts()
 r = bot_login()
 while True:
 	run_bot(r)
+
+
