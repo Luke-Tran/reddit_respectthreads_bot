@@ -5,8 +5,7 @@ import os
 import unicodedata
 
 keyword = 'respect'
-subreddit_list = ['test', 'u_Luke_Username', 'u_respectthread_bot']
-#subreddit_list = ['whowouldwin', 'respectthreads', 'characterrant', 'test', 'u_Luke_Username', 'u_respectthread_bot']
+subreddit_list = ['whowouldwin', 'respectthreads', 'characterrant', 'test', 'u_respectthread_bot']
 
 posts_list = []
 
@@ -90,31 +89,30 @@ def generate_search_results(linelist):
 	for string in linelist:
 		query += string + ' '
 
+        # Remove extra space at end if string
 	query = query[:-1]
 
 	searchResults = r.subreddit('respectthreads').search(query, sort='relevance', syntax='lucene', time_filter='all')
 	filteredResults = []
 
 	# Separate between bracketed and unbracketed user text, and remove accents.
-	bracketedQuery = substring_in_brackets(query)
-	bracketedQuery = strip_accents(bracketedQuery)
-	unbracketedQuery = substring_out_brackets(query)
-	unbracketedQuery = strip_accents(unbracketedQuery)
+	bracketedQuery = strip_accents(substring_in_brackets(query))
+	unbracketedQuery = strip_accents(substring_out_brackets(query))
 
+        # If the user specified the version or verse in brackets
 	if len(bracketedQuery) > 0:
 		for post in searchResults:
 			# Separate between bracketed and unbracketed title text, and remove accents.
-			unbracketedTitle = substring_out_brackets(post.title)
-			unbracketedTitle = strip_accents(unbracketedTitle)
-			bracketedTitle = substring_in_brackets(post.title)
-			bracketedTitle = strip_accents(bracketedTitle)
+			unbracketedTitle = strip_accents(substring_out_brackets(post.title))
+			bracketedTitle = strip_accents(substring_in_brackets(post.title))
 
 			# Check for matches between user text and post title.
 			if unbracketedQuery in unbracketedTitle and bracketedQuery in bracketedTitle:
 				filteredResults.append(post)
+	# Else if the user only specified the name
 	else:
 		for post in searchResults:
-			unbracketedTitle = substring_out_brackets(post.title)
+			unbracketedTitle = strip_accents(substring_out_brackets(post.title))
 			if unbracketedQuery in unbracketedTitle:
 				filteredResults.append(post)
 
