@@ -5,7 +5,7 @@ import os
 import unicodedata
 
 keyword = 'respect'
-subreddit_list = ['whowouldwin', 'respectthreads', 'characterrant', 'test', 'u_respectthread_bot']
+subreddit_list = ['whowouldwin', 'respectthreads', 'characterrant', 'test']
 
 posts_list = []
 
@@ -66,7 +66,7 @@ def generate_reply(comment, resultList):
 		replyText += '***\n\n'
 
 	replyText += '^(I am a bot) ^| '
-	replyText += '[^(Purpose)](https://redd.it/bd2mld) ^| '
+	replyText += '[^(About)](https://redd.it/bd2mld) ^| '
 	replyText += '[^(How to use)](https://redd.it/bd2iv9) ^| '
 	replyText += '[^(Code)](https://pastebin.com/gaU5qTmD) ^| '
 	replyText += '^(Send questions to u/Luke_Username)'
@@ -74,7 +74,7 @@ def generate_reply(comment, resultList):
 	comment.reply(replyText)
 	print(replyText)
 	with open("saved_posts.txt", "a") as f:
-		f.write(comment.id + '\n')
+		f.write('\n' + comment.id + '\n')
 	posts_list.append(comment.id)
 	resultList = []
 
