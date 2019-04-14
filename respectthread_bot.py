@@ -1,13 +1,14 @@
-import praw 
+import praw
 import config
 import time
 import os
 import unicodedata
 
 keyword = 'respect'
-sub = 'test'
+subreddit_list = ['test', 'u_Luke_Username', 'u_respectthread_bot']
+#subreddit_list = ['whowouldwin', 'respectthreads', 'characterrant', 'test', 'u_Luke_Username', 'u_respectthread_bot']
 
-posts_list = []	
+posts_list = []
 
 def bot_login():
 	print('Logging in...')
@@ -25,31 +26,33 @@ class LineResults:
 		self.searchResults = searchResults
 
 def run_bot(r):
-	resultList = []
+	for sub in subreddit_list:
+		# loop through every comment on a certain subreddit. Limits to 30 comments.
+		quantity = 30
+		print('Obtaining ' + str(quantity) + ' comments from r/' + sub + '...')
+		for comment in r.subreddit(sub).comments(limit=quantity):
+			resultList = []
+			replyTo = False
+			body = comment.body.lower()
 
-	# loop through every comment on a certain subreddit. Limits to 25 comments.
-	print('Obtaining 50 comments...')
-	for comment in r.subreddit(sub).comments(limit=50):
-		replyTo = False
-		body = comment.body.lower()
+			if comment.author != r.user.me() and comment not in posts_list and keyword in body:
+				bodylist = body.split('\n')
+				for line in bodylist:
+					linelist = line.split()
+					if len(linelist) >= 2:
+						# For now, it won't check numbered lists.
+						if linelist[0] == keyword or (linelist[1] == keyword and (linelist[0] == '-' or linelist[0] == '*' or linelist[0] == '+')):
+							searchResults = generate_search_results(linelist)
+							resultList.append(LineResults(linelist, searchResults))
+							replyTo = True
 
-		if comment.author != r.user.me() and comment not in posts_list and keyword in body:
-			bodylist = body.split('\n')
-			for line in bodylist:
-				linelist = line.split()
-				if len(linelist) >= 2:
-					# For now, it won't check numbered lists.
-					if linelist[0] == keyword or (linelist[1] == keyword and (linelist[0] == '-' or linelist[0] == '*' or linelist[0] == '+')):
-						searchResults = generate_search_results(linelist)		
-						resultList.append(LineResults(linelist, searchResults))
-						replyTo = True
+				if replyTo:
+					generate_reply(comment, resultList)
 
-			if replyTo:
-				generate_reply(comment, resultList)
-	
-	print('Sleeping for 20 seconds...')
-	time.sleep(20)
-		
+	sleep_time = 20
+	print('Sleeping for ' + str(sleep_time) + ' seconds...')
+	time.sleep(sleep_time)
+
 def generate_reply(comment, resultList):
 	replyText = ''
 	for result in resultList:
@@ -60,11 +63,13 @@ def generate_reply(comment, resultList):
 				replyText += '- [' + searchResult.title + '](' + searchResult.shortlink + ')' + '\n\n'
 		else:
 			replyText += 'Sorry, I couldn\'t find anything on r/respectthreads for *' + query + '*\n\n'
-		
+
 		replyText += '***\n\n'
-		
-	replyText += '^(This bot is never running. Don\'t try to use it.)\n\n'
-	replyText += '[^(Code can be found here.)](https://pastebin.com/gaU5qTmD) '
+
+	replyText += '^(I am a bot) ^| '
+	replyText += '[^(Purpose)](https://redd.it/bd2mld) ^| '
+	replyText += '[^(How to use)](https://redd.it/bd2iv9) ^| '
+	replyText += '[^(Code)](https://pastebin.com/gaU5qTmD) ^| '
 	replyText += '^(Send questions to u/Luke_Username)'
 
 	comment.reply(replyText)
@@ -72,7 +77,8 @@ def generate_reply(comment, resultList):
 	with open("saved_posts.txt", "a") as f:
 		f.write(comment.id + '\n')
 	posts_list.append(comment.id)
-		
+	resultList = []
+
 def generate_search_results(linelist):
 	if linelist[0] == keyword:
 		linelist.pop(0)
@@ -85,16 +91,16 @@ def generate_search_results(linelist):
 		query += string + ' '
 
 	query = query[:-1]
-	
+
 	searchResults = r.subreddit('respectthreads').search(query, sort='relevance', syntax='lucene', time_filter='all')
 	filteredResults = []
-	
+
 	# Separate between bracketed and unbracketed user text, and remove accents.
 	bracketedQuery = substring_in_brackets(query)
 	bracketedQuery = strip_accents(bracketedQuery)
 	unbracketedQuery = substring_out_brackets(query)
 	unbracketedQuery = strip_accents(unbracketedQuery)
-		
+
 	if len(bracketedQuery) > 0:
 		for post in searchResults:
 			# Separate between bracketed and unbracketed title text, and remove accents.
@@ -102,7 +108,7 @@ def generate_search_results(linelist):
 			unbracketedTitle = strip_accents(unbracketedTitle)
 			bracketedTitle = substring_in_brackets(post.title)
 			bracketedTitle = strip_accents(bracketedTitle)
-			
+
 			# Check for matches between user text and post title.
 			if unbracketedQuery in unbracketedTitle and bracketedQuery in bracketedTitle:
 				filteredResults.append(post)
@@ -111,13 +117,12 @@ def generate_search_results(linelist):
 			unbracketedTitle = substring_out_brackets(post.title)
 			if unbracketedQuery in unbracketedTitle:
 				filteredResults.append(post)
-	
+
 	return filteredResults
 
 def substring_in_brackets(query):
 	A = list(query)
-	inBrackets = False 
-
+	inBrackets = False
 	c = 0
 	while c < len(A):
 		if not inBrackets:
@@ -130,12 +135,12 @@ def substring_in_brackets(query):
 				del A[c]
 			else:
 				c += 1
-	
+
 	return ''.join(A).lower()
 
 def substring_out_brackets(query):
 	A = list(query)
-	inBrackets = False 
+	inBrackets = False
 
 	c = 0
 	while c < len(A):
@@ -151,7 +156,7 @@ def substring_out_brackets(query):
 	return ''.join(A).lower()
 
 def get_saved_posts():
-	#Make sure the file exists.
+	# Make sure the file exists.
 	if not os.path.isfile("saved_posts.txt"):
 		posts_list = []
 	else:
@@ -159,24 +164,19 @@ def get_saved_posts():
 		with open("saved_posts.txt", "r") as f:
 			posts_list = f.read()
 			posts_list = posts_list.split("\n")
-	return posts_list	
+	return posts_list
 
-# Method retrieved from https://stackoverflow.com/a/44433664
 def strip_accents(text):
     try:
         text = unicode(text, 'utf-8')
-    except NameError: # unicode is a default on python 3 
+    except NameError: # unicode is a default on python 3
+        #print("NameError")
         pass
+    
+    text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode("utf-8")
+    return str(text).replace("-", " ") # Remove dashes
 
-    text = unicodedata.normalize('NFD', text)\
-           .encode('ascii', 'ignore')\
-           .decode("utf-8")
-		   
-    return str(text)
-	
 posts_list = get_saved_posts()
 r = bot_login()
 while True:
 	run_bot(r)
-
-
