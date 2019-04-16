@@ -108,7 +108,7 @@ def substring_in_brackets(query):
 			else:
 				c += 1
 
-	return ''.join(A).lower()
+	return ''.join(A).lower().strip()
 
 def substring_out_brackets(query):
 	A = list(query)
@@ -125,7 +125,8 @@ def substring_out_brackets(query):
 			if A[c] == ')' or A[c] == ']':
 				inBrackets = False
 			del A[c]
-	return ''.join(A).lower()
+			
+	return ''.join(A).lower().strip()
 
 def strip_accents(text):
     try:
