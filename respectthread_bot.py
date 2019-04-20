@@ -39,7 +39,7 @@ def run_bot(r):
 				bodylist = comment.body.split('\n')
 				for line in bodylist:
 					linelist = line.split()
-					if len(linelist) >= 2:
+					if len(linelist) >= 2 and len(line) < 150 and 'https://www.reddit.com/r/respectthreads' not in line and 'https://redd.it' not in line:
 						if linelist[0].lower() == keyword or (linelist[1].lower() == keyword and (linelist[0] == '-' or linelist[0] == '*' or linelist[0] == '+')):
 							searchResults = generate_search_results(linelist)
 							resultList.append(LineResults(linelist, searchResults))
@@ -63,7 +63,7 @@ def generate_search_results(linelist):
 	for string in linelist:
 		query += string + ' '
 
-    # Remove extra space at end of string
+	# Remove extra space at end of string
 	query = query[:-1]
 
 	searchResults = r.subreddit('respectthreads').search(query, sort='relevance', syntax='lucene', time_filter='all')
@@ -73,7 +73,7 @@ def generate_search_results(linelist):
 	bracketedQuery = strip_accents(substring_in_brackets(query))
 	unbracketedQuery = strip_accents(substring_out_brackets(query))
 
-    # If the user specified the version or verse in brackets
+	# If the user specified the version or verse in brackets
 	if len(bracketedQuery) > 0:
 		for post in searchResults:
 			# Separate between bracketed and unbracketed title text, and remove accents.
@@ -108,7 +108,7 @@ def substring_in_brackets(query):
 			else:
 				c += 1
 
-	return ''.join(A).lower().strip()
+	return ''.join(A).lower()
 
 def substring_out_brackets(query):
 	A = list(query)
@@ -125,8 +125,8 @@ def substring_out_brackets(query):
 			if A[c] == ')' or A[c] == ']':
 				inBrackets = False
 			del A[c]
-			
-	return ''.join(A).lower().strip()
+	
+	return ''.join(A).lower()
 
 def strip_accents(text):
     try:
@@ -136,7 +136,7 @@ def strip_accents(text):
         pass
 
     text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode("utf-8")
-    return str(text).replace("-", " ") # Remove dashes
+    return str(text).replace("-", " ").strip() # Remove dashes
 
 def generate_reply(comment, resultList):
 	replyText = ''
@@ -154,7 +154,8 @@ def generate_reply(comment, resultList):
 	replyText += '^(I am a bot) ^| '
 	replyText += '[^(About)](https://redd.it/bd2mld) ^| '
 	replyText += '[^(How to use)](https://redd.it/bd2iv9) ^| '
-	replyText += '[^(Code)](https://pastebin.com/gaU5qTmD) ^| '
+	replyText += '[^(How to run)](https://redd.it/be38fh) ^| '
+	replyText += '[^(Code)](https://github.com/Luke-Tran/reddit_respectthreads_bot)'
 
 	comment.reply(replyText)
 	print(replyText)
